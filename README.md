@@ -1,7 +1,5 @@
 # LakeForge: Modern Data Lakehouse
 
-[![CI](https://github.com/bsdgsmm/lakeforge-modern-data-lakehouse/actions/workflows/ci.yml/badge.svg)](https://github.com/bsdgsmm/lakeforge-modern-data-lakehouse/actions/workflows/ci.yml)
-
 LakeForge is a Bronze/Silver/Gold lakehouse pipeline built with PySpark and Parquet for a
 fictional online marketplace. It ingests daily customer, product, order and payment
 extracts, validates and deduplicates them, and publishes an analytics-ready star schema
@@ -406,9 +404,6 @@ $ make test-unit
 35 passed, 6 deselected in 45.94s
 ```
 
-CI runs the same lint and test steps on GitHub Actions (Ubuntu, Python 3.12, Temurin 17),
-plus a pipeline smoke run and a Docker build that runs the demo.
-
 ## Project structure
 
 ```text
@@ -437,8 +432,7 @@ plus a pipeline smoke run and a Docker build that runs the demo.
 ├── tests/
 ├── docs/images/
 ├── data/                      # generated; only data/README.md is tracked
-├── Dockerfile, docker-compose.yml, Makefile, pyproject.toml
-└── .github/workflows/ci.yml
+└── Dockerfile, docker-compose.yml, Makefile, pyproject.toml
 ```
 
 ## Limitations
