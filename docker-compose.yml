@@ -1,0 +1,14 @@
+services:
+  lakeforge:
+    build: .
+    image: lakeforge:local
+    working_dir: /app
+    volumes:
+      - .:/app
+    environment:
+      LAKEFORGE_DATA_DIR: ${LAKEFORGE_DATA_DIR:-data}
+      LAKEFORGE_SPARK_MASTER: ${LAKEFORGE_SPARK_MASTER:-local[*]}
+      LAKEFORGE_SHUFFLE_PARTITIONS: ${LAKEFORGE_SHUFFLE_PARTITIONS:-4}
+      LAKEFORGE_LOG_LEVEL: ${LAKEFORGE_LOG_LEVEL:-INFO}
+      LAKEFORGE_SPARK_LOG_LEVEL: ${LAKEFORGE_SPARK_LOG_LEVEL:-ERROR}
+    command: ["make", "demo"]
