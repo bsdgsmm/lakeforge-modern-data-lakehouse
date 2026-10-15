@@ -1,0 +1,103 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 560" width="1200" height="560" font-family="Helvetica, Arial, sans-serif">
+  <title>LakeForge architecture: landing files flow through Bronze, Silver and Gold Parquet layers</title>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#52514e"/>
+    </marker>
+    <style>
+      .box { fill: #ffffff; stroke: #c9c8c3; stroke-width: 1.5; }
+      .bronze { fill: #fbf1e6; stroke: #c98a4a; }
+      .silver { fill: #eef1f5; stroke: #8a96a8; }
+      .gold { fill: #fdf6dc; stroke: #c9a227; }
+      .side { fill: #f6f5f2; stroke: #b5b4ae; stroke-dasharray: 5 4; }
+      .title { font-size: 17px; font-weight: 700; fill: #0b0b0b; }
+      .label { font-size: 12.5px; fill: #2c2b29; }
+      .muted { font-size: 11.5px; fill: #6b6a65; }
+      .edge { stroke: #52514e; stroke-width: 1.6; fill: none; marker-end: url(#arrow); }
+      .edge-dashed { stroke: #8f8e88; stroke-width: 1.4; fill: none; stroke-dasharray: 5 4; marker-end: url(#arrow); }
+      .caption { font-size: 11px; fill: #52514e; }
+    </style>
+  </defs>
+
+  <rect width="1200" height="560" fill="#fcfcfb"/>
+
+  <text x="40" y="44" font-size="22" font-weight="700" fill="#0b0b0b">LakeForge data flow</text>
+  <text x="40" y="68" class="muted">Single-node Spark (local mode) over Parquet on the local filesystem. Every layer is rebuilt idempotently per batch.</text>
+
+  <!-- Landing -->
+  <rect x="40" y="110" width="200" height="250" rx="10" class="box"/>
+  <text x="60" y="140" class="title">Landing</text>
+  <text x="60" y="162" class="muted">data/landing/&lt;entity&gt;/</text>
+  <text x="60" y="178" class="muted">batch_date=YYYY-MM-DD/</text>
+  <text x="60" y="210" class="label">customers.csv</text>
+  <text x="60" y="232" class="label">products.csv</text>
+  <text x="60" y="254" class="label">orders.jsonl (nested items)</text>
+  <text x="60" y="276" class="label">transactions.csv</text>
+  <text x="60" y="314" class="muted">Seeded synthetic generator,</text>
+  <text x="60" y="330" class="muted">defects injected on purpose</text>
+
+  <!-- Bronze -->
+  <rect x="300" y="110" width="200" height="250" rx="10" class="box bronze"/>
+  <text x="320" y="140" class="title">Bronze</text>
+  <text x="320" y="162" class="muted">partitioned by _batch_date</text>
+  <text x="320" y="196" class="label">Explicit all-string schema</text>
+  <text x="320" y="218" class="label">Corrupt JSON kept in</text>
+  <text x="320" y="234" class="label">_corrupt_record</text>
+  <text x="320" y="256" class="label">+ _source_file, _ingested_at,</text>
+  <text x="320" y="272" class="label">  _record_hash</text>
+  <text x="320" y="314" class="muted">Replay-safe: a batch rewrite</text>
+  <text x="320" y="330" class="muted">replaces only its partition</text>
+
+  <!-- Silver -->
+  <rect x="560" y="110" width="270" height="250" rx="10" class="box silver"/>
+  <text x="580" y="140" class="title">Silver</text>
+  <text x="580" y="162" class="muted">facts partitioned by event date</text>
+  <text x="580" y="196" class="label">Cast, trim, normalise case</text>
+  <text x="580" y="218" class="label">Validation rules + referential</text>
+  <text x="580" y="234" class="label">integrity against Silver dims</text>
+  <text x="580" y="256" class="label">Latest-record-wins dedup per key</text>
+  <text x="580" y="278" class="label">Merge into affected partitions</text>
+  <text x="580" y="314" class="muted">customers · products</text>
+  <text x="580" y="330" class="muted">orders (order_date) · transactions</text>
+  <text x="580" y="346" class="muted">(transaction_date)</text>
+
+  <!-- Gold -->
+  <rect x="890" y="110" width="270" height="250" rx="10" class="box gold"/>
+  <text x="910" y="140" class="title">Gold</text>
+  <text x="910" y="162" class="muted">star schema + aggregates</text>
+  <text x="910" y="196" class="label">dim_customer · dim_product</text>
+  <text x="910" y="218" class="label">fact_order_items (order_date)</text>
+  <text x="910" y="240" class="muted">  incremental by partition</text>
+  <text x="910" y="270" class="label">daily_revenue</text>
+  <text x="910" y="292" class="label">product_performance</text>
+  <text x="910" y="314" class="label">customer_activity</text>
+  <text x="910" y="336" class="muted">  recomputed from the fact table</text>
+
+  <!-- Main edges -->
+  <path d="M240,235 L296,235" class="edge"/>
+  <path d="M500,235 L556,235" class="edge"/>
+  <path d="M830,235 L886,235" class="edge"/>
+
+  <!-- Quarantine -->
+  <rect x="560" y="420" width="270" height="100" rx="10" class="box side"/>
+  <text x="580" y="450" class="title">Quarantine</text>
+  <text x="580" y="474" class="label">Rejected raw rows + reasons</text>
+  <text x="580" y="494" class="muted">partitioned by _batch_date</text>
+  <path d="M695,360 L695,416" class="edge-dashed"/>
+  <text x="704" y="394" class="caption">failed rules</text>
+
+  <!-- State -->
+  <rect x="300" y="420" width="200" height="100" rx="10" class="box side"/>
+  <text x="320" y="450" class="title">State manifest</text>
+  <text x="320" y="474" class="label">Processed batches,</text>
+  <text x="320" y="494" class="label">metrics, gold_pending</text>
+  <path d="M400,416 L400,364" class="edge-dashed"/>
+  <text x="410" y="394" class="caption">skip done batches</text>
+
+  <!-- Consumers -->
+  <rect x="890" y="420" width="270" height="100" rx="10" class="box"/>
+  <text x="910" y="450" class="title">Consumers</text>
+  <text x="910" y="474" class="label">Spark SQL examples (sql/*.sql)</text>
+  <text x="910" y="494" class="label">Charts (scripts/render_charts.py)</text>
+  <path d="M1025,360 L1025,416" class="edge"/>
+</svg>
